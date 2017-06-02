@@ -3,7 +3,7 @@
 <!-- 
    OVERVIEW
    
-   ASCC/Schematron.com Skeleton Module for ISO Schematron (for XSLT2 systems)
+   ASCC/Schematron.com Skeleton Module for ISO Schematron (for XSLT2/3 systems)
    
    ISO Schematron is a language for making assertion about the presence or absense
    of patterns in XML documents. It is typically used for as a schema language, or
@@ -23,8 +23,8 @@
    and ASCC, Tapei.
    
    There are two versions of this skeleton: one is tailored for XSLT1 processors
-   and the other is tailored for XSLT2 processors. Future versions of the
-   XSLT2 skeleton may support more features than that the XSLT 1 skeleton.
+   and the other is tailored for XSLT2/3 processors. Future versions of the
+   XSLT2/3 skeleton may support more features than that the XSLT 1 skeleton.
 -->
   
 <!--
@@ -136,8 +136,9 @@ THE SOFTWARE.
      provide library locations. For engines that require the functions, either hard code
      them in this script or provide them on the command-line argument.
       
-  XSLT 2:   Experimental support
-     A schema using the XSLT 2 query binding will have a /schema/@queryBinding='xslt2'.
+  XSLT 2/3:   Experimental support
+     A schema using the XSLT 2 or 3 query binding will have /schema/@queryBinding='xslt2'
+     or /schema/@queryBinding='xslt3'.
      This binding is expected to be formalized as part of ISO
      Schematron, which currently reserves the "xslt2" name for this purpose.
      The xsl:import-schema, xsl:key and xsl:function elements are allowed as top elements. 
@@ -607,9 +608,9 @@ which require a preprocess.
 	</axsl:stylesheet>
 </xsl:template>
 
-<!-- Using XSLT 2 -->
+<!-- Using XSLT 2 or 3-->
 <xsl:template 
-	match="iso:schema[@queryBinding='xslt2' or @queryBinding ='xpath2']" 
+	match="iso:schema[@queryBinding=('xslt2', 'xslt3') or @queryBinding ='xpath2']" 
 	priority="10">
 	<axsl:stylesheet
 	   xmlns:xs="http://www.w3.org/2001/XMLSchema" 
@@ -619,7 +620,7 @@ which require a preprocess.
         <xsl:apply-templates 
 		select="iso:ns" />
 	    <!-- Handle the namespaces before the version attribute: reported to help SAXON -->
-	    <xsl:attribute name="version">2.0</xsl:attribute>
+ 	    <xsl:attribute name="version" select="if (@queryBinding eq 'xslt3') then '3.0' else '2.0'"/>
 	    
 		<xsl:apply-templates select="." mode="stylesheetbody"/>
 		<!-- was xsl:call-template name="stylesheetbody"/ -->
@@ -729,8 +730,8 @@ which require a preprocess.
    		<axsl:template match="*" mode="schematron-get-full-path">
 			<axsl:apply-templates select="parent::*" mode="schematron-get-full-path"/>
 			<xsl:choose>
-				<xsl:when test="//iso:schema[@queryBinding='xslt2']">
-					<!-- XSLT2 syntax -->
+				<xsl:when test="//iso:schema[@queryBinding=('xslt2', 'xslt3')]">
+					<!-- XSLT2/3 syntax -->
 			<axsl:text>/</axsl:text>		
 			<axsl:choose>
       			<axsl:when test="namespace-uri()=''"><axsl:value-of select="name()"/></axsl:when>
@@ -782,8 +783,8 @@ which require a preprocess.
        	 	
 		<axsl:template match="@*" mode="schematron-get-full-path">
 			<xsl:choose>
-				<xsl:when test="//iso:schema[@queryBinding='xslt2']">
-					<!-- XSLT2 syntax -->
+				<xsl:when test="//iso:schema[@queryBinding=('xslt2', 'xslt3')]">
+					<!-- XSLT2/3 syntax -->
 			<axsl:apply-templates select="parent::*" mode="schematron-get-full-path"/>
       		<axsl:text>/</axsl:text>
 			<axsl:choose>
@@ -1302,7 +1303,7 @@ which require a preprocess.
 	<!-- Importing an XSD schema allows the variour type operations to be available. -->
 	<xsl:template  match="xsl:import-schema" mode="do-types" >	 
 		<xsl:choose>
-		  <xsl:when test="ancestor::iso:schema[@queryBinding='xslt2']">
+		  <xsl:when test="ancestor::iso:schema[@queryBinding=('xslt2', 'xslt3')]">
 		  	<xsl:copy-of select="." />
 		  </xsl:when>
 		<xsl:otherwise>
@@ -2276,7 +2277,7 @@ which require a preprocess.
 	<xhtml:p id="sch-message-20a">Unable to open referenced included file: </xhtml:p>
 	<xhtml:p id="sch-message-20b" />
 	<xhtml:p id="sch-message-21">Schema error: Use include to include fragments, not a whole schema</xhtml:p>
-	<xhtml:p id="sch-message-22">Schema error: XSD schemas may only be imported if you are using the 'xslt2' query language binding</xhtml:p>
+	<xhtml:p id="sch-message-22">Schema error: XSD schemas may only be imported if you are using the 'xslt2' or 'xslt3' query language binding</xhtml:p>
 	<xhtml:p id="sch-message-23">Schema error: The import-schema element is not available in the ISO Schematron namespace. Use the XSLT namespace.</xhtml:p>
 	<xhtml:p id="sch-message-24">Warning: Variables should not be used with the "xpath" query language binding.</xhtml:p>
 	<xhtml:p id="sch-message-25">Warning: Variables should not be used with the "xpath2" query language binding.</xhtml:p>
